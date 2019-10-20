@@ -11,14 +11,6 @@ type BigIntContainer struct {
 	destination *big.Int
 }
 
-// BigIntHandler acts like a pointer to a big.Int value in a BigIntContainer.
-type BigIntHandler struct {
-	start    int
-	length   int
-	capacity int
-	negative bool
-}
-
 // NewBigIntContainer constructs a new BigIntContainer.
 func NewBigIntContainer() *BigIntContainer {
 	return &BigIntContainer{
@@ -29,20 +21,31 @@ func NewBigIntContainer() *BigIntContainer {
 	}
 }
 
+// BigIntHandle acts like a pointer to a big.Int value in a BigIntContainer.
+type BigIntHandle struct {
+	start    int
+	length   int
+	capacity int
+	negative bool
+}
+
+// Zero is a reference to Zero value. Zero doesn't need storage.
+var Zero = BigIntHandle{
+	start:    0,
+	length:   0,
+	capacity: 0,
+	negative: false,
+}
+
 // Insert adds a copy of a big number into the BigIntContainer.
-func (c *BigIntContainer) Insert(bi *big.Int) BigIntHandler {
+func (c *BigIntContainer) Insert(bi *big.Int) BigIntHandle {
 	if bi.Sign() == 0 {
-		return BigIntHandler{
-			start:    0,
-			length:   0,
-			capacity: 0,
-			negative: false,
-		}
+		return Zero
 	}
 	words := bi.Bits()
 	start := len(c.data)
 	c.data = append(c.data, words[:cap(words)]...) // copy full capacity, to allow later extension
-	return BigIntHandler{
+	return BigIntHandle{
 		start:    start,
 		length:   len(words),
 		capacity: cap(words),
@@ -51,12 +54,12 @@ func (c *BigIntContainer) Insert(bi *big.Int) BigIntHandler {
 }
 
 // InsertUint64 adds a uint64 number into the BigIntContainer.
-func (c *BigIntContainer) InsertUint64(x uint64) BigIntHandler {
+func (c *BigIntContainer) InsertUint64(x uint64) BigIntHandle {
 	bi := big.NewInt(0).SetUint64(x)
 	return c.Insert(bi)
 }
 
-func (c *BigIntContainer) loadBigInt(handler BigIntHandler, target *big.Int) {
+func (c *BigIntContainer) loadBigInt(handler BigIntHandle, target *big.Int) {
 	// setting the capacity is very important
 	// the math/big library will sometimes try to extend the slice, but not beyond its capacity
 	// if we do not specify slice capacity, the default capacity might extend over other number data
@@ -67,16 +70,16 @@ func (c *BigIntContainer) loadBigInt(handler BigIntHandler, target *big.Int) {
 	}
 }
 
-// Extract yields a copy of a BigIntContainer number, as big.Int.
-func (c *BigIntContainer) Extract(handler BigIntHandler) *big.Int {
+// Get yields a copy of a BigIntContainer number, as big.Int.
+func (c *BigIntContainer) Get(handler BigIntHandle) *big.Int {
 	result := big.NewInt(0)
 	c.loadBigInt(handler, result)
 	return big.NewInt(0).Set(result) // clone, to prevent accidental changing of underlying structure
 }
 
-// ExtractUnsafe casts a BigIntContainer number to big.Int.
+// GetUnsafe casts a BigIntContainer number to big.Int.
 // Changing the resulting big.Int will also change the underlying data.
-func (c *BigIntContainer) ExtractUnsafe(handler BigIntHandler) *big.Int {
+func (c *BigIntContainer) GetUnsafe(handler BigIntHandle) *big.Int {
 	result := big.NewInt(0)
 	c.loadBigInt(handler, result)
 	return result
