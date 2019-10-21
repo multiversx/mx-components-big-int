@@ -26,7 +26,7 @@ func TestInsertExtract(t *testing.T) {
 	for _, value := range []int64{0, 1, -1, -10, 200} {
 		bi := big.NewInt(value)
 		x := c.Insert(bi)
-		check := c.Extract(x)
+		check := c.Get(x)
 		if bi.Cmp(check) != 0 {
 			t.Errorf("TestInsertExtract failed. Want: %d, got %d", bi, check)
 		}
@@ -44,7 +44,7 @@ func TestAddSub(t *testing.T) {
 		z = c.Add(z, x, y)
 		z = c.Sub(z, z, y)
 
-		sum := c.Extract(z)
+		sum := c.Get(z)
 		if big.NewInt(0).SetUint64(testCase[0]).Cmp(sum) != 0 {
 			t.Errorf("bad result. Want: %d, got %d", testCase[0], sum)
 		}
@@ -62,7 +62,7 @@ func TestSubAdd(t *testing.T) {
 		z = c.Sub(z, x, y)
 		z = c.Add(z, z, y)
 
-		sum := c.Extract(z)
+		sum := c.Get(z)
 		if big.NewInt(0).SetUint64(testCase[0]).Cmp(sum) != 0 {
 			t.Errorf("bad result. Want: %d, got %d", testCase[0], sum)
 		}
