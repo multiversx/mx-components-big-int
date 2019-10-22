@@ -2,16 +2,19 @@ package managedbigint
 
 import "math/big"
 
+// used for resetting values
+var bigZero = big.NewInt(0)
+
 // Insert adds a copy of a big number into the BigIntContainer.
 func (c *BigIntContainer) Insert(bi *big.Int) BigIntHandle {
 	if bi.Sign() == 0 {
 		return Zero
 	}
 	words := bi.Bits()
-	start := len(c.data)
+	newIndex := len(c.data)
 	c.data = append(c.data, words[:cap(words)]...) // copy full capacity, to allow later extension
 	return BigIntHandle{
-		start:    start,
+		start:    newIndex,
 		length:   len(words),
 		capacity: cap(words),
 		negative: bi.Sign() < 0,
@@ -24,9 +27,33 @@ func (c *BigIntContainer) InsertUint64(x uint64) BigIntHandle {
 	return c.Insert(bi)
 }
 
-// Set sets dest to x.
+// Set sets dest = x. It performs a copy of the data.
 func (c *BigIntContainer) Set(dest, x BigIntHandle) BigIntHandle {
 	return c.performUnaryOperation((*big.Int).Set, dest, x)
+}
+
+// Update replaces contents at dest with value of given argument.
+func (c *BigIntContainer) Update(dest BigIntHandle, newValue *big.Int) BigIntHandle {
+	if newValue == nil {
+		newValue = bigZero
+	}
+
+	c.loadBigInt(dest, c.destination)
+
+	destDataBefore := c.destination.Bits()
+
+	c.destination = c.destination.Set(newValue)
+
+	destDataAfter := c.destination.Bits()
+
+	if bigIntDataMoved(destDataBefore, destDataAfter) {
+		return c.Insert(c.destination)
+	}
+
+	// maybe dest changed sign
+	dest.negative = c.destination.Sign() < 0
+
+	return dest
 }
 
 func (c *BigIntContainer) loadBigInt(handler BigIntHandle, target *big.Int) {
