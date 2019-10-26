@@ -8,7 +8,7 @@ import "math/big"
 //    0 if x == y
 //   +1 if x >  y
 //
-func (c *BigIntContainer) Cmp(op binaryOperation, dest, x, y BigIntHandle) int {
+func (c *BigIntContainer) Cmp(x, y BigIntHandle) int {
 	c.loadBigInt(x, c.register1)
 	c.loadBigInt(y, c.register2)
 	return c.register1.Cmp(c.register2)
@@ -20,7 +20,7 @@ func (c *BigIntContainer) Cmp(op binaryOperation, dest, x, y BigIntHandle) int {
 //    0 if |x| == |y|
 //   +1 if |x| >  |y|
 //
-func (c *BigIntContainer) CmpAbs(op binaryOperation, dest, x, y BigIntHandle) int {
+func (c *BigIntContainer) CmpAbs(x, y BigIntHandle) int {
 	c.loadBigInt(x, c.register1)
 	c.loadBigInt(y, c.register2)
 	return c.register1.CmpAbs(c.register2)
