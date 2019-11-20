@@ -2,29 +2,35 @@ package twoscomplement
 
 import "math/big"
 
-// BytesToSignedBigInt convert a byte array to a number
-// interprets input as a 2's complement representation if the first bit (most significant) is 1
-// big endian
-func BytesToSignedBigInt(twosBytes []byte) *big.Int {
+// FromBytes converts a byte array to a number.
+// Interprets input as a 2's complement representation if the first bit (most significant) is 1.
+// Big endian.
+func FromBytes(twosBytes []byte) *big.Int {
+	return SetBytes(new(big.Int), twosBytes)
+}
+
+// SetBytes changes z to be the number represented as bytes in 2's complement,
+// and returns z.
+// Big endian.
+func SetBytes(z *big.Int, twosBytes []byte) *big.Int {
 	if len(twosBytes) == 0 {
-		return big.NewInt(0)
+		return z.SetInt64(0)
 	}
 
 	testBit := twosBytes[0] >> 7
-	result := new(big.Int)
 	if testBit == 0 {
 		// positive number, no further processing required
-		result.SetBytes(twosBytes)
+		z = z.SetBytes(twosBytes)
 	} else {
 		// convert to negative number
 		notBytes := make([]byte, len(twosBytes))
 		for i, b := range twosBytes {
 			notBytes[i] = ^b // negate every bit
 		}
-		result.SetBytes(notBytes)
-		result.Neg(result)
-		result.Sub(result, bigOne) // -1
+		z = z.SetBytes(notBytes)
+		z = z.Neg(z)
+		z = z.Sub(z, bigOne) // -1
 	}
 
-	return result
+	return z
 }

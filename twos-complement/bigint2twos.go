@@ -4,9 +4,9 @@ import "math/big"
 
 var bigOne = big.NewInt(1)
 
-// BigIntToTwosBytes returns a variable length two's complement byte array representation of the input.
+// ToBytes returns a variable length two's complement byte array representation of the input.
 // Does not alter input.
-func BigIntToTwosBytes(bi *big.Int) []byte {
+func ToBytes(bi *big.Int) []byte {
 	var resultBytes []byte
 	switch bi.Sign() {
 	case -1:
@@ -38,9 +38,9 @@ func BigIntToTwosBytes(bi *big.Int) []byte {
 	return resultBytes
 }
 
-// BigIntToTwosBytesOfLength returns a byte array representation, 2's complement if number is negative.
+// ToBytesOfLength returns a byte array representation, 2's complement if number is negative.
 // Big endian.
-func BigIntToTwosBytesOfLength(i *big.Int, bytesLength int) []byte {
+func ToBytesOfLength(i *big.Int, bytesLength int) []byte {
 	var resultBytes []byte
 	switch i.Sign() {
 	case -1:
