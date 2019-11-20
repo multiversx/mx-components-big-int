@@ -1,4 +1,4 @@
-module github.com/ElrondNetwork/managed-big-int
+module github.com/ElrondNetwork/big-int-util
 
 go 1.13
 
