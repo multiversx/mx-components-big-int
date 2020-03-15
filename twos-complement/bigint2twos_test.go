@@ -13,6 +13,8 @@ func TestToBytesOf(t *testing.T) {
 	assertToBytesOk(t, "1", []byte{0x01})
 	assertToBytesOk(t, "-1", []byte{0xFF})
 	assertToBytesOk(t, "-2", []byte{0xFE})
+	assertToBytesOk(t, "127", []byte{0x7f})
+	assertToBytesOk(t, "128", []byte{0x00, 0x80}) // first bit 1 requires extra 0-byte to keep sign
 	assertToBytesOk(t, "255", []byte{0x00, 0xFF})
 	assertToBytesOk(t, "256", []byte{0x01, 0x00})
 	assertToBytesOk(t, "-255", []byte{0xFF, 0x01})
