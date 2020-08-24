@@ -7,7 +7,7 @@ import (
 
 var bigOne = big.NewInt(1)
 
-// ToBytes returns a variable length two's complement byte array representation of the input.
+// ToBytes returns a byte array of variable length representing the input big.Int in two's complement.
 // Does not alter input.
 func ToBytes(bi *big.Int) []byte {
 	var resultBytes []byte
