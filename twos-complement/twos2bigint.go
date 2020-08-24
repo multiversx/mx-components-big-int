@@ -17,8 +17,8 @@ func SetBytes(z *big.Int, twosBytes []byte) *big.Int {
 		return z.SetInt64(0)
 	}
 
-	testBit := twosBytes[0] >> 7
-	if testBit == 0 {
+	mostSignificantBit := twosBytes[0] >> 7
+	if mostSignificantBit == 0 {
 		// positive number, no further processing required
 		z = z.SetBytes(twosBytes)
 	} else {
