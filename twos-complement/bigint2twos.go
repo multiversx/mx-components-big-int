@@ -1,6 +1,9 @@
 package twoscomplement
 
-import "math/big"
+import (
+	"fmt"
+	"math/big"
+)
 
 var bigOne = big.NewInt(1)
 
@@ -12,7 +15,7 @@ func ToBytes(bi *big.Int) []byte {
 	case -1:
 		// compute 2's complement
 		plus1 := big.NewInt(0)
-		plus1 = plus1.Add(bi, big.NewInt(1)) // add 1
+		plus1 = plus1.Add(bi, bigOne) // add 1
 		resultBytes = plus1.Bytes()
 		for i, b := range resultBytes {
 			resultBytes[i] = ^b // negate every bit
@@ -40,14 +43,29 @@ func ToBytes(bi *big.Int) []byte {
 
 // ToBytesOfLength returns a byte array representation, 2's complement if number is negative.
 // Big endian.
-func ToBytesOfLength(i *big.Int, bytesLength int) []byte {
+// Will return error if value does not fit in requested number of bytes.
+func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 	var resultBytes []byte
 	switch i.Sign() {
 	case -1:
 		// compute 2's complement
 		plus1 := big.NewInt(0)
-		plus1 = plus1.Add(i, big.NewInt(1)) // add 1
+		plus1 = plus1.Add(i, bigOne) // add 1
 		plus1Bytes := plus1.Bytes()
+
+		// validation
+		minimumBytes := len(plus1Bytes)
+		if len(plus1Bytes) == 0 || plus1Bytes[0]>>7 != 0 {
+			// if leading bit is not 0, then the resulting test bit will not be 1 (gets XOR-ed),
+			// require another byte in front
+			// to disambiguate from a positive number
+			minimumBytes++
+		}
+		if bytesLength < minimumBytes {
+			return []byte{}, fmt.Errorf("representation of %d does not fit in %d bytes", i, bytesLength)
+		}
+
+		// copy bytes
 		offset := len(plus1Bytes) - bytesLength
 		resultBytes = make([]byte, bytesLength)
 		for i := 0; i < bytesLength; i++ {
@@ -65,8 +83,22 @@ func ToBytesOfLength(i *big.Int, bytesLength int) []byte {
 		break
 	case 1:
 		originalBytes := i.Bytes()
-		resultBytes = make([]byte, bytesLength)
+
+		// validation
+		minimumBytes := len(originalBytes)
+		if originalBytes[0]>>7 != 0 {
+			// if test bit is not 0,
+			// add another byte in front
+			// to disambiguate from a negative number
+			minimumBytes++
+		}
+		if bytesLength < minimumBytes {
+			return []byte{}, fmt.Errorf("representation of %d does not fit in %d bytes", i, bytesLength)
+		}
+
+		// copy bytes
 		offset := len(originalBytes) - bytesLength
+		resultBytes = make([]byte, bytesLength)
 		for i := 0; i < bytesLength; i++ {
 			j := offset + i
 			if j < 0 {
@@ -78,5 +110,5 @@ func ToBytesOfLength(i *big.Int, bytesLength int) []byte {
 		break
 	}
 
-	return resultBytes
+	return resultBytes, nil
 }

@@ -2,6 +2,7 @@ package twoscomplement
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -34,16 +35,43 @@ func TestToBytesOfLength(t *testing.T) {
 	assertToBytesOfLengthOk(t, "0", 0, []byte{})
 	assertToBytesOfLengthOk(t, "0", 1, []byte{0x00})
 	assertToBytesOfLengthOk(t, "1", 1, []byte{0x01})
+	assertToBytesOfLengthErr(t, "1", 0)
 	assertToBytesOfLengthOk(t, "-1", 1, []byte{0xFF})
+	assertToBytesOfLengthErr(t, "-2", 0)
 	assertToBytesOfLengthOk(t, "0", 3, []byte{0x00, 0x00, 0x00})
 	assertToBytesOfLengthOk(t, "1", 3, []byte{0x00, 0x00, 0x01})
 	assertToBytesOfLengthOk(t, "-1", 3, []byte{0xFF, 0xFF, 0xFF})
+
+	assertToBytesOfLengthOk(t, "128", 2, []byte{0x00, 0x80})
+	assertToBytesOfLengthOk(t, "255", 2, []byte{0x00, 0xFF})
+	assertToBytesOfLengthOk(t, "256", 2, []byte{0x01, 0x00})
+	assertToBytesOfLengthOk(t, "-255", 2, []byte{0xFF, 0x01})
+	assertToBytesOfLengthOk(t, "-256", 2, []byte{0xFF, 0x00})
+	assertToBytesOfLengthOk(t, "-257", 2, []byte{0xFE, 0xFF})
+
+	assertToBytesOfLengthErr(t, "128", 1)
+	assertToBytesOfLengthErr(t, "255", 1)
+	assertToBytesOfLengthErr(t, "256", 1)
+	assertToBytesOfLengthErr(t, "-255", 1)
+	assertToBytesOfLengthErr(t, "-256", 1)
+	assertToBytesOfLengthErr(t, "-257", 1)
 }
 
 func assertToBytesOfLengthOk(t *testing.T, input string, length int, expected []byte) {
 	inputBi := big.NewInt(0)
 	_ = inputBi.UnmarshalText([]byte(input))
 
-	result := ToBytesOfLength(inputBi, length)
+	result, err := ToBytesOfLength(inputBi, length)
+	assert.Nil(t, err)
 	assert.True(t, bytes.Equal(result, expected), "ToBytesOfLength returned wrong result")
+}
+
+func assertToBytesOfLengthErr(t *testing.T, input string, length int) {
+	inputBi := big.NewInt(0)
+	_ = inputBi.UnmarshalText([]byte(input))
+
+	result, err := ToBytesOfLength(inputBi, length)
+	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), fmt.Sprintf("representation of %d does not fit in %d bytes", inputBi, length))
+	assert.Equal(t, len(result), 0)
 }
