@@ -63,7 +63,7 @@ func assertToBytesOfLengthOk(t *testing.T, input string, length int, expected []
 
 	result, err := ToBytesOfLength(inputBi, length)
 	assert.Nil(t, err)
-	assert.True(t, bytes.Equal(result, expected), "ToBytesOfLength returned wrong result")
+	assert.True(t, bytes.Equal(result, expected), "ToBytesOfLength returned wrong result. Want: %v. Have: %v.", expected, result)
 }
 
 func assertToBytesOfLengthErr(t *testing.T, input string, length int) {

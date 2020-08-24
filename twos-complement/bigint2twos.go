@@ -45,7 +45,6 @@ func ToBytes(bi *big.Int) []byte {
 // Big endian.
 // Will return error if value does not fit in requested number of bytes.
 func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
-	var resultBytes []byte
 	switch i.Sign() {
 	case -1:
 		// compute 2's complement
@@ -67,7 +66,7 @@ func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 
 		// copy bytes
 		offset := len(plus1Bytes) - bytesLength
-		resultBytes = make([]byte, bytesLength)
+		resultBytes := make([]byte, bytesLength)
 		for i := 0; i < bytesLength; i++ {
 			j := offset + i
 			if j < 0 {
@@ -76,11 +75,10 @@ func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 				resultBytes[i] = ^plus1Bytes[j] // also negate every bit
 			}
 		}
-		break
+		return resultBytes, nil
 	case 0:
 		// just zeroes
-		resultBytes = make([]byte, bytesLength)
-		break
+		return make([]byte, bytesLength), nil
 	case 1:
 		originalBytes := i.Bytes()
 
@@ -97,18 +95,9 @@ func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 		}
 
 		// copy bytes
-		offset := len(originalBytes) - bytesLength
-		resultBytes = make([]byte, bytesLength)
-		for i := 0; i < bytesLength; i++ {
-			j := offset + i
-			if j < 0 {
-				resultBytes[i] = 0 // pad left with 00000000
-			} else {
-				resultBytes[i] = originalBytes[j]
-			}
-		}
-		break
+		return CopyAlignRight(originalBytes, bytesLength), nil
 	}
 
-	return resultBytes, nil
+	// unreachable
+	panic("unreachable")
 }
