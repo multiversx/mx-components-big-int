@@ -20,7 +20,7 @@ func ToBytes(bi *big.Int) []byte {
 		for i, b := range resultBytes {
 			resultBytes[i] = ^b // negate every bit
 		}
-		if len(resultBytes) == 0 || resultBytes[0]>>7 != 1 {
+		if len(resultBytes) == 0 || msbIsZero(resultBytes[0]) {
 			// if test bit is not 1,
 			// add another byte in front
 			// to disambiguate from a positive number
@@ -30,7 +30,7 @@ func ToBytes(bi *big.Int) []byte {
 		return []byte{}
 	case 1:
 		resultBytes = bi.Bytes()
-		if resultBytes[0]>>7 != 0 {
+		if msbIsOne(resultBytes[0]) {
 			// if test bit is not 0,
 			// add another byte in front
 			// to disambiguate from a negative number
@@ -54,7 +54,7 @@ func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 
 		// validation
 		minimumBytes := len(plus1Bytes)
-		if len(plus1Bytes) == 0 || plus1Bytes[0]>>7 != 0 {
+		if len(plus1Bytes) == 0 || msbIsOne(plus1Bytes[0]) {
 			// if leading bit is not 0, then the resulting test bit will not be 1 (gets XOR-ed),
 			// require another byte in front
 			// to disambiguate from a positive number
@@ -84,7 +84,7 @@ func ToBytesOfLength(i *big.Int, bytesLength int) ([]byte, error) {
 
 		// validation
 		minimumBytes := len(originalBytes)
-		if originalBytes[0]>>7 != 0 {
+		if msbIsOne(originalBytes[0]) {
 			// if test bit is not 0,
 			// add another byte in front
 			// to disambiguate from a negative number

@@ -17,3 +17,13 @@ func CopyAlignRight(input []byte, targetLength int) []byte {
 	}
 	return resultBytes
 }
+
+// most significant bit is 1
+func msbIsOne(b byte) bool {
+	return b>>7 == 1
+}
+
+// most significant bit is 0
+func msbIsZero(b byte) bool {
+	return b>>7 == 0
+}
