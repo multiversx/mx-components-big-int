@@ -1,6 +1,6 @@
 module github.com/multiversx/mx-components-big-int
 
-go 1.20
+go 1.23
 
 require github.com/stretchr/testify v1.7.1
 
