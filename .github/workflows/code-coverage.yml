@@ -11,9 +11,6 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - name: Set up Go 1.x
         uses: actions/setup-go@v6
@@ -29,51 +26,11 @@ jobs:
           go get -v -t -d ./...
 
       - name: Run unit tests
-        run: go test -short -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -short -cover -coverprofile=coverage.txt -covermode=atomic -v ./...
 
-      - name: Coverage summary
-        run: |
-          go tool cover -func=coverage.txt > coverage-func.txt
-          total=$(tail -1 coverage-func.txt | awk '{print $3}')
-          {
-            echo "### Total coverage: ${total}"
-            echo "<details><summary>Per function</summary>"
-            echo ""
-            echo '```'
-            cat coverage-func.txt
-            echo '```'
-            echo "</details>"
-          } > coverage-report.md
-          cat coverage-report.md >> "$GITHUB_STEP_SUMMARY"
-          echo "TOTAL=${total}" >> "$GITHUB_ENV"
-
-      - name: Comment coverage on PR
-        # forks get a read-only token and cannot comment
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          marker='<!-- coverage-report -->'
-          { echo "$marker"; cat coverage-report.md; } > comment.md
-          # update our previous comment if there is one, otherwise create it
-          if ! gh pr comment "$PR_NUMBER" --edit-last --create-if-none --body-file comment.md; then
-            gh pr comment "$PR_NUMBER" --body-file comment.md
-          fi
-
-      - name: Check minimum coverage
-        env:
-          MIN_COVERAGE: 50
-        run: |
-          awk -v t="${TOTAL%\%}" -v min="$MIN_COVERAGE" 'BEGIN { if (t+0 < min+0) { print "coverage " t "% is below " min "%"; exit 1 } }'
-
-      - name: Build HTML report
-        if: always()
-        run: go tool cover -html=coverage.txt -o coverage.html
-
-      - name: Upload HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
         with:
-          name: coverage
-          path: coverage.html
+          fail_ci_if_error: true
+          files: coverage.txt
+          token: ${{ secrets.CODECOV_TOKEN }}
