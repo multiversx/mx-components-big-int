@@ -4,10 +4,9 @@ import "math/big"
 
 // Cmp compares x and y and returns:
 //
-//   -1 if x <  y
-//    0 if x == y
-//   +1 if x >  y
-//
+//	-1 if x <  y
+//	 0 if x == y
+//	+1 if x >  y
 func (c *BigIntContainer) Cmp(x, y BigIntHandle) int {
 	c.loadBigInt(x, c.register1)
 	c.loadBigInt(y, c.register2)
@@ -16,10 +15,9 @@ func (c *BigIntContainer) Cmp(x, y BigIntHandle) int {
 
 // CmpAbs compares the absolute values of x and y and returns:
 //
-//   -1 if |x| <  |y|
-//    0 if |x| == |y|
-//   +1 if |x| >  |y|
-//
+//	-1 if |x| <  |y|
+//	 0 if |x| == |y|
+//	+1 if |x| >  |y|
 func (c *BigIntContainer) CmpAbs(x, y BigIntHandle) int {
 	c.loadBigInt(x, c.register1)
 	c.loadBigInt(y, c.register2)

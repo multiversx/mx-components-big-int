@@ -9,14 +9,7 @@ func (c *BigIntContainer) SetBytes(dest BigIntHandle, buf []byte) BigIntHandle {
 
 	c.destination = c.destination.SetBytes(buf)
 
-	destDataAfter := c.destination.Bits()
-
-	if bigIntDataMoved(destDataBefore, destDataAfter) {
-		return c.Insert(c.destination)
-	}
-
-	dest.negative = false
-	return dest
+	return c.storeResult(dest, destDataBefore)
 }
 
 // GetBytes returns the absolute value of x as a big-endian byte slice.
@@ -64,14 +57,5 @@ func (c *BigIntContainer) SetInt64(dest BigIntHandle, value int64) BigIntHandle 
 
 	c.destination = c.destination.SetInt64(value)
 
-	destDataAfter := c.destination.Bits()
-
-	if bigIntDataMoved(destDataBefore, destDataAfter) {
-		return c.Insert(c.destination)
-	}
-
-	// maybe dest changed sign
-	dest.negative = c.destination.Sign() < 0
-
-	return dest
+	return c.storeResult(dest, destDataBefore)
 }

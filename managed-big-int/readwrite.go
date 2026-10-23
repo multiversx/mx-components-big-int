@@ -44,16 +44,7 @@ func (c *BigIntContainer) Update(dest BigIntHandle, newValue *big.Int) BigIntHan
 
 	c.destination = c.destination.Set(newValue)
 
-	destDataAfter := c.destination.Bits()
-
-	if bigIntDataMoved(destDataBefore, destDataAfter) {
-		return c.Insert(c.destination)
-	}
-
-	// maybe dest changed sign
-	dest.negative = c.destination.Sign() < 0
-
-	return dest
+	return c.storeResult(dest, destDataBefore)
 }
 
 func (c *BigIntContainer) loadBigInt(handler BigIntHandle, target *big.Int) {
